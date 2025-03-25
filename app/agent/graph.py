@@ -4,7 +4,7 @@ from typing import Dict, List, Any, Annotated, TypedDict, Optional
 
 import langgraph.graph as lg
 from langgraph.graph import StateGraph, START, END
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.schema import HumanMessage, AIMessage
 
@@ -129,7 +129,7 @@ def _should_use_tools(state: AgentState) -> str:
     return "finish"
 
 
-def _generate_response(state: AgentState, llm: ChatOpenAI) -> AgentState:
+def _generate_response(state: AgentState, llm: ChatGoogleGenerativeAI) -> AgentState:
     """生成用户问题的最终回答"""
     question = state["question"]
     chat_history = state.get("chat_history", [])
@@ -181,21 +181,22 @@ def _generate_response(state: AgentState, llm: ChatOpenAI) -> AgentState:
     return new_state
 
 
-def create_agent_executor(model_name: str = "gpt-3.5-turbo", temperature: float = 0.7):
+def create_agent_executor(model_name: str = "gemini-pro", temperature: float = 0.7):
     """
     创建LangGraph代理执行器
     
     Args:
-        model_name: 使用的LLM模型名称
+        model_name: 使用的LLM模型名称，默认为 gemini-pro
         temperature: 模型温度参数
         
     Returns:
         LangGraph执行器
     """
     # 初始化LLM
-    llm = ChatOpenAI(
+    llm = ChatGoogleGenerativeAI(
         model=model_name,
-        temperature=temperature
+        temperature=temperature,
+        google_api_key=os.getenv("GOOGLE_API_KEY")
     )
     
     # 创建 LangGraph
